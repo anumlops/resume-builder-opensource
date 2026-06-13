@@ -145,12 +145,11 @@ resume-builder-opensource/
   examples/           # Sample JD, experience, output
   tests/              # Test suite
 
-  docs/
-    plugin-setup.md     # Plugin installation guide for OpenCode
-
-  src/opencode-plugin/
-    tools/
-      resume-builder.ts # Custom tool for bullet validation
+  plugin/             # OpenCode plugin (copy to ~/.opencode/)
+    opencode.json       # Config with resume-coach agent + /resume command
+    skills/             # Master skill prompt
+    plugins/ecc-hooks.ts # Plugin registering resume-validate-bullet tool
+    tools/resume-builder.ts # Custom tool for bullet validation
 ```
 
 **Cost estimate:** ~$0.003 per resume with DeepSeek, ~$0.11 with Claude.
@@ -171,20 +170,20 @@ resume-builder-opensource/
 
 This project includes a full OpenCode plugin that adds resume tools, a dedicated agent, and a `/resume` command.
 
-### Plugin Files
+### Plugin File Structure
 
-The plugin is installed at `~/.opencode/` and consists of:
+All plugin files are in the `plugin/` directory. These are **the actual live files** installed into your OpenCode setup.
 
 ```
-~/.opencode/
-  tools/
-    resume-builder.ts       # Custom tool: resume-validate-bullet
-  plugins/
-    ecc-hooks.ts            # Plugin registers the tool + event hooks
+plugin/                           # Copy these into ~/.opencode/
+  opencode.json                   # Config: registers resume-coach agent + /resume command
   skills/
     professional-resume-builder/
-      SKILL.md              # Master skill prompt (12 sections)
-  opencode.json             # Config: registers resume-coach agent + /resume command
+      SKILL.md                    # Master skill prompt (12 sections)
+  plugins/
+    ecc-hooks.ts                  # Plugin: registers resume-validate-bullet tool + event hooks
+  tools/
+    resume-builder.ts             # Custom tool: validates bullets against PAR rules
 ```
 
 ### What Gets Registered
@@ -202,29 +201,55 @@ The plugin is installed at `~/.opencode/` and consists of:
 git clone https://github.com/anumlops/resume-builder-opensource
 cd resume-builder-opensource
 
-# 2. Copy plugin files to OpenCode
-copy src\opencode-plugin\tools\resume-builder.ts %USERPROFILE%\.opencode\tools\
-# (Update ecc-hooks.ts import + opencode.json agent/command as shown in docs/plugin-setup.md)
+# 2. Copy all plugin files into your OpenCode installation
+copy plugin\skills\professional-resume-builder\SKILL.md %USERPROFILE%\.opencode\skills\professional-resume-builder\SKILL.md
+copy plugin\tools\resume-builder.ts %USERPROFILE%\.opencode\tools\resume-builder.ts
+copy plugin\plugins\ecc-hooks.ts %USERPROFILE%\.opencode\plugins\ecc-hooks.ts
+copy plugin\opencode.json %USERPROFILE%\.opencode\opencode.json
 
-# 3. Restart OpenCode
-# The tool, agent, and command are now available
+# 3. Verify TypeScript compiles
+cd %USERPROFILE%\.opencode
+npx tsc --noEmit
+
+# 4. Restart OpenCode
+# The tool, agent, and /resume command are now available
 ```
 
-### Using the Plugin
+### How to Use
 
 **Via command (easiest):**
 ```
 /resume Senior Product Manager role at SaaS Co...
 Looking for someone with technical background. My experience: I led 5 engineers...
 ```
+This dispatches to the `resume-coach` agent with the full skill loaded.
 
 **Via agent:**
 ```
 @resume-coach I need to optimize this resume for a PM role...
 ```
 
-**Via tool (called automatically by agent):**
-The `resume-validate-bullet` tool checks: word count, verb tier (flags Tier 3 like "responsible for"), quantification (detects %, $, baseline context), keyword alignment against your JD, PAR compliance.
+**Via skill (in any session):**
+```
+Skill -> professional-resume-builder
+Then provide your JD + experience
+```
+
+### What the Tool Validates
+
+The `resume-validate-bullet` tool checks every bullet against these rules:
+
+| Check | What It Detects | Score Impact |
+|-------|----------------|--------------|
+| Word count | Too short (<5), too long (>25), or optimal (15-20) | -5 to -20 |
+| Verb quality | Tier 1 (pass), Tier 2 (warn), Tier 3 like "responsible for" (fail) | -5 to -25 |
+| Quantification | Numbers, %, $, baseline context (from X to Y) | -10 to -25 |
+| Punctuation | Trailing period | -5 |
+| Tense | Present participle (-ing) warning | -5 |
+| PAR compliance | Action + Context + Result all present | -5 to -10 |
+| Keyword alignment | % of JD keywords matched in bullet | -10 to -15 |
+
+Output: overall score (0-100) + verdict (REWRITE / NEEDS WORK / GOOD / EXCELLENT) + specific fix suggestions.
 
 ---
 

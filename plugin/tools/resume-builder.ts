@@ -5,8 +5,6 @@
  * PAR framework, Tier 1-2 verb system, and ATS formatting rules.
  *
  * Designed to work alongside the professional-resume-builder skill.
- * Install by copying this file to ~/.opencode/tools/resume-builder.ts
- * and registering in ecc-hooks.ts + opencode.json.
  */
 
 import { tool, type ToolDefinition } from "@opencode-ai/plugin/tool"
@@ -120,6 +118,7 @@ const resumeBulletTool: ToolDefinition = tool({
     if (hasNumber) {
       const detail = [hasPercent ? "%" : null, hasDollar ? "$" : null].filter(Boolean).join(" + ")
       checks.quantification = { status: "pass", message: `Contains metrics (number${detail ? ` + ${detail}` : ""})` }
+      // Check for baseline context when percentage present
       if (hasPercent) {
         const hasBaseline = /from\s+\d/.test(lower) || /\(/.test(bullet)
         if (!hasBaseline) {
@@ -224,11 +223,21 @@ function getVerbSuggestion(tier3Phrase: string, industry: string): string {
       management: ["Championed", "Developed", "Transformed"],
       general: ["Led", "Managed", "Delivered"],
     },
-    "involved in": { general: ["Led", "Executed", "Contributed"] },
-    "assisted with": { general: ["Supported", "Facilitated", "Enabled"] },
-    "helped with": { general: ["Enabled", "Improved", "Strengthened"] },
-    "worked on": { general: ["Built", "Developed", "Designed"] },
-    "contributed to": { general: ["Drove", "Delivered", "Advanced"] },
+    "involved in": {
+      general: ["Led", "Executed", "Contributed"],
+    },
+    "assisted with": {
+      general: ["Supported", "Facilitated", "Enabled"],
+    },
+    "helped with": {
+      general: ["Enabled", "Improved", "Strengthened"],
+    },
+    "worked on": {
+      general: ["Built", "Developed", "Designed"],
+    },
+    "contributed to": {
+      general: ["Drove", "Delivered", "Advanced"],
+    },
   }
   const phrase = tier3Phrase.toLowerCase()
   const norm = Object.keys(map).find(k => phrase.includes(k))
@@ -239,9 +248,16 @@ function getVerbSuggestion(tier3Phrase: string, industry: string): string {
 
 function getTier1Suggestion(tier2Verb: string): string | null {
   const upgrades: Record<string, string> = {
-    led: "Spearheaded", managed: "Orchestrated", created: "Architected",
-    developed: "Engineered", implemented: "Deployed", mentored: "Elevated",
-    analyzed: "Diagnosed", evaluated: "Assessed", executed: "Delivered", launched: "Pioneered",
+    led: "Spearheaded",
+    managed: "Orchestrated",
+    created: "Architected",
+    developed: "Engineered",
+    implemented: "Deployed",
+    mentored: "Elevated",
+    analyzed: "Diagnosed",
+    evaluated: "Assessed",
+    executed: "Delivered",
+    launched: "Pioneered",
   }
   return upgrades[tier2Verb] || null
 }
