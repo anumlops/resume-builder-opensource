@@ -144,6 +144,13 @@ resume-builder-opensource/
 
   examples/           # Sample JD, experience, output
   tests/              # Test suite
+
+  docs/
+    plugin-setup.md     # Plugin installation guide for OpenCode
+
+  src/opencode-plugin/
+    tools/
+      resume-builder.ts # Custom tool for bullet validation
 ```
 
 **Cost estimate:** ~$0.003 per resume with DeepSeek, ~$0.11 with Claude.
@@ -157,6 +164,67 @@ resume-builder-opensource/
 
 **After (PAR-compliant, Tier 1 verb, baseline context, business impact):**
 "Spearheaded customer success strategy, increasing retention by 22% (78% to 95%) through personalized onboarding, preventing $340K churn annually"
+
+---
+
+## OpenCode Plugin Integration
+
+This project includes a full OpenCode plugin that adds resume tools, a dedicated agent, and a `/resume` command.
+
+### Plugin Files
+
+The plugin is installed at `~/.opencode/` and consists of:
+
+```
+~/.opencode/
+  tools/
+    resume-builder.ts       # Custom tool: resume-validate-bullet
+  plugins/
+    ecc-hooks.ts            # Plugin registers the tool + event hooks
+  skills/
+    professional-resume-builder/
+      SKILL.md              # Master skill prompt (12 sections)
+  opencode.json             # Config: registers resume-coach agent + /resume command
+```
+
+### What Gets Registered
+
+| Component | Name | Purpose |
+|-----------|------|---------|
+| **Tool** | `resume-validate-bullet` | Validates bullets against PAR rules (verb tier, word count, metrics, keywords). Returns score + fix suggestions. |
+| **Agent** | `resume-coach` | Dedicated subagent that loads the SKILL.md automatically and calls the validation tool |
+| **Command** | `/resume` | Quick access: `/resume <job description + experience>` dispatches to resume-coach |
+
+### How to Install
+
+```bash
+# 1. Clone this repo
+git clone https://github.com/anumlops/resume-builder-opensource
+cd resume-builder-opensource
+
+# 2. Copy plugin files to OpenCode
+copy src\opencode-plugin\tools\resume-builder.ts %USERPROFILE%\.opencode\tools\
+# (Update ecc-hooks.ts import + opencode.json agent/command as shown in docs/plugin-setup.md)
+
+# 3. Restart OpenCode
+# The tool, agent, and command are now available
+```
+
+### Using the Plugin
+
+**Via command (easiest):**
+```
+/resume Senior Product Manager role at SaaS Co...
+Looking for someone with technical background. My experience: I led 5 engineers...
+```
+
+**Via agent:**
+```
+@resume-coach I need to optimize this resume for a PM role...
+```
+
+**Via tool (called automatically by agent):**
+The `resume-validate-bullet` tool checks: word count, verb tier (flags Tier 3 like "responsible for"), quantification (detects %, $, baseline context), keyword alignment against your JD, PAR compliance.
 
 ---
 
