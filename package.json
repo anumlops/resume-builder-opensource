@@ -1,0 +1,41 @@
+{
+  "name": "resume-builder-opensource",
+  "version": "1.0.0",
+  "description": "Open-source professional resume builder using PAR framework and AI",
+  "main": "dist/index.js",
+  "bin": {
+    "resume": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/index.ts",
+    "cli": "ts-node src/cli.ts",
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "keywords": [
+    "resume",
+    "resume-builder",
+    "ai",
+    "career",
+    "job-search",
+    "ats",
+    "open-source"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.20.0",
+    "openai": "^4.47.0",
+    "dotenv": "^16.0.0",
+    "typescript": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0"
+  }
+}

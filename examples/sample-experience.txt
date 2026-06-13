@@ -1,0 +1,19 @@
+ROLE: Product Manager at TechCorp
+DURATION: 2020-2023
+
+ACHIEVEMENTS:
+1. Launched new API product that became 30% of company revenue
+   - Led 5 engineers, 2 designers
+   - Took 6 months from concept to launch
+   - First month: $50K MRR
+   
+2. Improved product adoption for existing customers
+   - Reduced onboarding time from 4 weeks to 2 weeks
+   - Increased activation rate from 45% to 72%
+   - Result: $2.3M incremental ARR
+
+3. Built customer advisory board
+   - Recruited 12 enterprise customers
+   - Led monthly sessions
+   - Generated 8 feature requests used in roadmap
+   - 100% of advisory board renewed contracts
